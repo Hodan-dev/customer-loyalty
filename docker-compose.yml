@@ -1,0 +1,42 @@
+version: '3.8'
+
+services:
+  web:
+    build: .
+    ports:
+      - "8000:80"
+    environment:
+      - DB_HOST=mysql
+      - DB_USER=loyalty_user
+      - DB_PASS=loyalty_password
+      - DB_NAME=loyalty_system
+    depends_on:
+      - mysql
+    volumes:
+      - ./web:/var/www/html
+    networks:
+      - loyalty-network
+    restart: unless-stopped
+
+  mysql:
+    image: mysql:8.0
+    environment:
+      - MYSQL_ROOT_PASSWORD=root_password
+      - MYSQL_DATABASE=loyalty_system
+      - MYSQL_USER=loyalty_user
+      - MYSQL_PASSWORD=loyalty_password
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./db/schema.sql:/docker-entrypoint-initdb.d/schema.sql
+    networks:
+      - loyalty-network
+    restart: unless-stopped
+
+volumes:
+  mysql_data:
+
+networks:
+  loyalty-network:
+    driver: bridge
